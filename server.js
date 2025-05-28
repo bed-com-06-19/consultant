@@ -1,6 +1,9 @@
 const express = require('express');
 const mongoose = require('mongoose');
 require('dotenv').config();
+const authRoutes = require('./routes/authRoutes');
+const { auth } = require('./middleware/authMiddleware');
+
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -22,6 +25,13 @@ const appointmentRoutes = require('./routes/appointmentRoutes');
 
 app.use('/api', authRoutes);
 app.use('/api', appointmentRoutes);
+app.use('/api/auth', authRoutes);
+
+// Example protected route
+app.get('/api/protected', auth, (req, res) => {
+  res.json({ message: `Hello ${req.user.role}, you are authenticated.` });
+});
+
 
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
 
