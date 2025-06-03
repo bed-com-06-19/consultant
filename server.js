@@ -3,7 +3,7 @@ const mongoose = require('mongoose');
 require('dotenv').config();
 const authRoutes = require('./routes/authRoutes');
 const { auth } = require('./middleware/authMiddleware');
-
+const appointmentRoutes = require('./routes/appointmentRoutes');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -19,9 +19,7 @@ app.get('/', (req, res) => {
   res.sendFile(__dirname + '/public/index.html');
 });
 
-// Connect routes
-const authRoutes = require('./routes/authRoutes');
-const appointmentRoutes = require('./routes/appointmentRoutes');
+
 
 app.use('/api', authRoutes);
 app.use('/api', appointmentRoutes);
