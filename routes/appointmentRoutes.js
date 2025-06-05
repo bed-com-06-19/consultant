@@ -1,12 +1,17 @@
 const express = require('express');
-const router = express.Router();
+const { auth } = require('../middleware/authMiddleware');
 const Appointment = require('../models/Appointment');
 
-// Create Appointment
-router.post('/appointments', async (req, res) => {
+const router = express.Router();
+
+// Create appointment (user)
+router.post('/appointments', auth, async (req, res) => {
   try {
-    const { clientId, consultantId, date, time } = req.body;
-    const appointment = new Appointment({ clientId, consultantId, date, time });
+    const appointment = new Appointment({
+      userId: req.user.userId,
+      date: req.body.date,
+      description: req.body.description,
+    });
     await appointment.save();
     res.status(201).json({ message: 'Appointment created' });
   } catch (err) {
@@ -14,12 +19,10 @@ router.post('/appointments', async (req, res) => {
   }
 });
 
-// View Appointments
-router.get('/appointments/:userId', async (req, res) => {
+// Get appointments for logged-in user
+router.get('/appointments', auth, async (req, res) => {
   try {
-    const { userId } = req.params;
-    const appointments = await Appointment.find({ $or: [{ clientId: userId }, { consultantId: userId }] })
-      .populate('clientId consultantId', 'name email');
+    const appointments = await Appointment.find({ userId: req.user.userId });
     res.json(appointments);
   } catch (err) {
     res.status(500).json({ error: err.message });

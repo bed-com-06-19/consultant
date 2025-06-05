@@ -4,6 +4,8 @@ require('dotenv').config();
 const authRoutes = require('./routes/authRoutes');
 const { auth } = require('./middleware/authMiddleware');
 const appointmentRoutes = require('./routes/appointmentRoutes');
+const adminRoutes = require('./routes/adminRoutes');
+
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -24,6 +26,7 @@ app.get('/', (req, res) => {
 app.use('/api', authRoutes);
 app.use('/api', appointmentRoutes);
 app.use('/api/auth', authRoutes);
+app.use('/api/admin', adminRoutes);
 
 // Example protected route
 app.get('/api/protected', auth, (req, res) => {
