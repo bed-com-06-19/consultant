@@ -1,30 +1,127 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>My Website</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ConsultPro - Home</title>
+  <link rel="stylesheet" href="css/style.css" />
+  <link
+  rel="stylesheet"
+  href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
+/>
+
 </head>
 <body>
-  <h1>Welcome!</h1>
-  <form id="userForm">
-    <input type="text" name="name" placeholder="Name" required>
-    <input type="email" name="email" placeholder="Email" required>
-    <button type="submit">Add User</button>
-  </form>
+  <!-- Header -->
+  <header class="navbar">
+    <div class="container nav-container">
+      <a href="#" class="logo">ConsultPro</a>
+      <nav>
+        <ul class="nav-links">
+          <li><a href="#" class="active">Home</a></li>
+          <li><a href="services.html">Services</a></li>
+          <li><a href="testimonial.html">Testimonial</a></li>
+          <li><a href="#about">About</a></li>
+          <li><a href="contact.html">Contact</a></li>
+          <li><a href="login.html" class="btn-login">Login</a></li>
+        </ul>
+      </nav>
+    </div>
+  </header>
 
-  <script>
-    const form = document.getElementById('userForm');
-    form.addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const formData = new FormData(form);
-      const data = Object.fromEntries(formData);
-      const res = await fetch('/api/users', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data)
-      });
-      const result = await res.json();
-      console.log(result);
-    });
-  </script>
+  <!-- Hero Section -->
+  <section class="hero">
+    <div class="container hero-content">
+      <h1>Transforming Ideas into Business Success</h1>
+      <p>Partner with our expert consultants for strategic growth and excellence.</p>
+      <a href="services.html" class="btn-primary">Explore Services</a>
+    </div>
+  </section>
+
+  <!-- Services Section -->
+  <section id="services" class="services-preview">
+    <div class="container">
+      <h2>Our Services</h2>
+      <div class="services-grid">
+        <div class="service-card">
+          <h3>Business Strategy</h3>
+          <p>Tailored strategies to boost your market presence and profitability.</p>
+        </div>
+        <div class="service-card">
+          <h3>Marketing Consulting</h3>
+          <p>Insight-driven marketing plans that drive customer engagement.</p>
+        </div>
+        <div class="service-card">
+          <h3>Financial Planning</h3>
+          <p>Secure financial frameworks for sustainable business growth.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Testimonials Section -->
+  <section id="testimonials" class="testimonials-preview">
+    <div class="container">
+      <h2>Client Testimonials</h2>
+      <div class="testimonials-grid">
+        <blockquote>
+          <p>"ConsultPro helped double our revenue in just one quarter!"</p>
+          <footer>– Jane Doe, CEO of BrightTech</footer>
+        </blockquote>
+        <blockquote>
+          <p>"Professional, strategic, and results-driven consultancy. Highly recommended."</p>
+          <footer>– John Smith, Founder of HealthSync</footer>
+        </blockquote>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer with Contact -->
+  <footer class="footer">
+    <div class="footer-content">
+      <div class="footer-col">
+        <h4>About Us</h4>
+        <p>We offer expert consulting services to help you reach personal and professional goals with strategic clarity and confidence.</p>
+      </div>
+  
+      <div class="footer-col">
+        <h4>Quick Links</h4>
+        <ul>
+          <li><a href="index.html">Home</a></li>
+          <li><a href="services.html">Services</a></li>
+          <li><a href="about.html">About</a></li>
+          <li><a href="testimonials.html">Testimonials</a></li>
+        </ul>
+      </div>
+  
+      <div class="footer-col">
+        <h4>Contact Us</h4>
+        <ul>
+          <li>Email: info@consultsite.com</li>
+          <li>Phone: +123-456-7890</li>
+          <li>Address: 123 Main Street, City, Country</li>
+        </ul>
+      </div>
+  
+      <div class="footer-col">
+        <h4>Newsletter</h4>
+        <form class="newsletter-form">
+          <input type="email" placeholder="Your email address" required>
+          <button type="submit">Subscribe</button>
+        </form>
+        <div class="social-icons">
+          <a href="#"><i class="fab fa-facebook-f"></i></a>
+          <a href="#"><i class="fab fa-twitter"></i></a>
+          <a href="#"><i class="fab fa-linkedin-in"></i></a>
+          <a href="#"><i class="fab fa-instagram"></i></a>
+        </div>
+      </div>
+    </div>
+  
+    <div class="footer-bottom">
+      &copy; 2025 ConsultSite. All rights reserved.
+    </div>
+  </footer>
+  
 </body>
 </html>

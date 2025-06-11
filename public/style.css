@@ -1,0 +1,239 @@
+
+
+
+  /* login */
+
+
+/* Reset and base styles */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+  
+  body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: linear-gradient(to right, #eef2f3, #8e9eab);
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: #333;
+  }
+  
+  .container {
+    width: 100%;
+    max-width: 400px;
+    padding: 20px;
+  }
+  
+  /* Card */
+  .card {
+    background: white;
+    padding: 30px 25px;
+    border-radius: 15px;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+    text-align: center;
+  }
+  
+  .login-card h2 {
+    margin-bottom: 10px;
+    font-size: 26px;
+    color: #333;
+  }
+  
+  .subtitle {
+    margin-bottom: 20px;
+    font-size: 14px;
+    color: #666;
+  }
+  
+  /* Form */
+  form {
+    text-align: left;
+  }
+  
+  label {
+    display: block;
+    margin-bottom: 5px;
+    font-size: 14px;
+  }
+  
+  input {
+    width: 100%;
+    padding: 10px 12px;
+    margin-bottom: 18px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    font-size: 15px;
+    transition: border-color 0.2s ease;
+  }
+  
+  input:focus {
+    border-color: #5b8def;
+    outline: none;
+  }
+  
+  /* Button */
+  .btn {
+    width: 100%;
+    background-color: #5b8def;
+    color: white;
+    padding: 12px;
+    border: none;
+    border-radius: 8px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background-color 0.25s ease;
+  }
+  
+  .btn:hover {
+    background-color: #497fd0;
+  }
+  
+  /* Links and error */
+  .small-text {
+    text-align: center;
+    font-size: 13px;
+    margin-top: 15px;
+    color: #666;
+  }
+  
+  .small-text a {
+    color: #5b8def;
+    text-decoration: none;
+  }
+  
+  .small-text a:hover {
+    text-decoration: underline;
+  }
+  
+  .error-message {
+    margin-top: 15px;
+    color: #d93025;
+    font-size: 14px;
+  }
+
+  
+
+
+  /* register */
+
+ /* Reset and base styles */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+  
+  body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: linear-gradient(to right, #eef2f3, #8e9eab);
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: #333;
+  }
+  
+  /* Container */
+  .container {
+    width: 100%;
+    max-width: 400px;
+    padding: 20px;
+  }
+  
+  /* Card */
+  .card {
+    background: white;
+    padding: 30px 25px;
+    border-radius: 15px;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+    text-align: center;
+  }
+  
+  .card h2 {
+    margin-bottom: 10px;
+    font-size: 26px;
+    color: #333;
+  }
+  
+  .subtitle {
+    margin-bottom: 20px;
+    font-size: 14px;
+    color: #666;
+  }
+  
+  /* Form */
+  form {
+    text-align: left;
+  }
+  
+  label {
+    display: block;
+    margin-bottom: 5px;
+    font-size: 14px;
+    color: #444;
+  }
+  
+  input,
+  select {
+    width: 100%;
+    padding: 10px 12px;
+    margin-bottom: 18px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    font-size: 15px;
+    transition: border-color 0.2s ease;
+  }
+  
+  input:focus,
+  select:focus {
+    border-color: #5b8def;
+    outline: none;
+  }
+  
+  /* Button */
+  button,
+  .btn {
+    width: 100%;
+    background-color: #5b8def;
+    color: white;
+    padding: 12px;
+    border: none;
+    border-radius: 8px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background-color 0.25s ease;
+    margin-top: 10px;
+  }
+  
+  button:hover,
+  .btn:hover {
+    background-color: #497fd0;
+  }
+  
+  /* Links and footer */
+  .form-footer {
+    text-align: center;
+    font-size: 14px;
+    margin-top: 20px;
+    color: #666;
+  }
+  
+  .form-footer a {
+    color: #5b8def;
+    text-decoration: none;
+  }
+  
+  .form-footer a:hover {
+    text-decoration: underline;
+  }
+  
+  /* Error message */
+  .error-message {
+    margin-top: 15px;
+    color: #d93025;
+    font-size: 14px;
+  }
+  

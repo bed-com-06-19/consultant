@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Client Dashboard</title>
+  <link rel="stylesheet" href="client.css">
+  <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+</head>
+<body>
+  <!-- Navbar -->
+  <header class="navbar">
+    <div class="container nav-container">
+      <a href="index.html" class="logo">ConsultPro</a>
+      <ul class="nav-links">
+        <li><a href="/public/index.html">Home</a></li>
+        <li><a href="/public/services.html">Services</a></li>
+        <li><a href="/public/testimonial.html">Testimonial</a></li>
+        <li><a href="/public/about.html">About</a></li>
+        <li><a href="/public/contact.html">Contact</a></li>
+        <li><a href="/public/client/client.html" class="active"><i class="fas fa-calendar-alt"></i> Bookings</a></li>
+        <li><a href="logout.html" class="btn-login">Logout</a></li>
+      </ul>
+    </div>
+  </header>
+
+  <!-- Page Content -->
+  <main class="container">
+    <section class="page-header">
+      <h1>Your Bookings</h1>
+      <button id="newBookingBtn" class="btn-primary">Book New Appointment</button>
+    </section>
+
+    <!-- Booking Form (hidden until triggered) -->
+    <section id="bookingFormSection" class="booking-form-section hidden">
+      <h2>New Appointment</h2>
+      <form id="bookingForm">
+        <label for="service">Service</label>
+        <select id="service" required></select>
+
+        <label for="date">Date</label>
+        <input type="date" id="date" required />
+
+        <label for="time">Time</label>
+        <input type="time" id="time" required />
+
+        <button type="submit" class="btn-primary">Submit Booking</button>
+        <button type="button" id="cancelBookingBtn" class="btn-secondary">Cancel</button>
+      </form>
+    </section>
+
+    <!-- Bookings Table -->
+    <section class="bookings-table-section">
+      <table>
+        <thead>
+          <tr>
+            <th>Service</th>
+            <th>Date</th>
+            <th>Time</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody id="bookingsBody"></tbody>
+      </table>
+    </section>
+  </main>
+
+  <script>
+    const API_BOOK = '/api/appointments';
+    const API_SERVICES = '/api/services';
+    const token = localStorage.getItem('token');
+
+    document.getElementById('newBookingBtn').onclick = () => {
+      document.getElementById('bookingFormSection').classList.remove('hidden');
+      loadServices();
+    };
+    document.getElementById('cancelBookingBtn').onclick = () => {
+      document.getElementById('bookingFormSection').classList.add('hidden');
+    };
+
+    async function loadServices() {
+      const res = await fetch(API_SERVICES, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      const services = await res.json();
+      const sel = document.getElementById('service');
+      sel.innerHTML = services.map(s => `<option value="${s._id}">${s.name}</option>`).join('');
+    }
+
+    document.getElementById('bookingForm').onsubmit = async e => {
+      e.preventDefault();
+      const data = {
+        serviceId: document.getElementById('service').value,
+        date: document.getElementById('date').value,
+        time: document.getElementById('time').value
+      };
+      await fetch(API_BOOK, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify(data)
+      });
+      document.getElementById('bookingFormSection').classList.add('hidden');
+      loadBookings();
+    };
+
+    async function loadBookings() {
+      const res = await fetch(API_BOOK, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      const books = await res.json();
+      document.getElementById('bookingsBody').innerHTML = books.map(b => `
+        <tr>
+          <td>${b.serviceName}</td>
+          <td>${new Date(b.date).toLocaleDateString()}</td>
+          <td>${b.time}</td>
+          <td class="status ${b.status.toLowerCase()}">${b.status}</td>
+        </tr>
+      `).join('');
+    }
+
+    loadBookings();
+  </script>
+</body>
+</html>

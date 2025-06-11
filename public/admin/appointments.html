@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Admin - Appointments</title>
+  <link rel="stylesheet" href="userManagement.css" />
+  <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+</head>
+<body>
+  <div class="dashboard">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="logo">Admin Panel</div>
+      <ul class="nav">
+        <li><a href="dashboard.html"><i class="fas fa-tachometer-alt"></i> Dashboard</a></li>
+        <li><a href="userManagement.html"><i class="fas fa-user"></i> Users</a></li>
+        <li class="active"><a href="appointments.html"><i class="fas fa-calendar-check"></i> Appointments</a></li>
+        <li><a href="settings.html"><i class="fas fa-cog"></i> Settings</a></li>
+        <li><a href="logout.html"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
+      </ul>
+      <button class="toggle-btn" id="toggleSidebar"><i class="fas fa-angle-left"></i></button>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+      <header class="dashboard-header">
+        <h1>Appointments</h1>
+      </header>
+
+      <section class="user-table-section">
+        <table class="user-table" id="appointmentsTable">
+          <thead>
+            <tr>
+              <th>User</th>
+              <th>Email</th>
+              <th>Date</th>
+              <th>Description</th>
+            </tr>
+          </thead>
+          <tbody>
+            <!-- Filled dynamically -->
+          </tbody>
+        </table>
+      </section>
+    </main>
+  </div>
+
+  <script>
+    document.getElementById("toggleSidebar").onclick = function () {
+      document.querySelector(".sidebar").classList.toggle("collapsed");
+    };
+
+    // Fetch and display appointments
+    async function fetchAppointments() {
+      try {
+        const response = await fetch('/api/admin/appointments', {
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('token')}`
+          }
+        });
+        const appointments = await response.json();
+
+        const tableBody = document.getElementById('appointmentsTable').querySelector('tbody');
+        tableBody.innerHTML = '';
+
+        appointments.forEach(appointment => {
+          const row = document.createElement('tr');
+          row.innerHTML = `
+            <td>${appointment.userId?.name || 'N/A'}</td>
+            <td>${appointment.userId?.email || 'N/A'}</td>
+            <td>${new Date(appointment.date).toLocaleString()}</td>
+            <td>${appointment.description}</td>
+          `;
+          tableBody.appendChild(row);
+        });
+      } catch (error) {
+        console.error('Error loading appointments:', error);
+      }
+    }
+
+    fetchAppointments();
+  </script>
+</body>
+</html>

@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Consultant Portal - Login</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="container">
+    <div class="card login-card">
+      <h2>Welcome Back</h2>
+      <p class="subtitle">Please login to continue</p>
+
+      <form id="loginForm">
+        <label for="email">Email</label>
+        <input type="email" id="email" required placeholder="you@example.com"/>
+
+        <label for="password">Password</label>
+        <input type="password" id="password" required placeholder="••••••••"/>
+
+        <button type="submit" class="btn">Login</button>
+        <p class="small-text">
+          Don't have an account? <a href="register.html">Register here</a>
+        </p>
+      </form>
+
+      <div id="loginError" class="error-message"></div>
+    </div>
+  </div>
+
+  <script>
+    document.getElementById('loginForm').addEventListener('submit', async function (e) {
+  e.preventDefault();
+
+  const email = document.getElementById('email').value;
+  const password = document.getElementById('password').value;
+
+  try {
+    const res = await fetch('/api/auth/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, password }),
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      throw new Error(data.message || 'Login failed');
+    }
+
+    localStorage.setItem('token', data.token);
+    localStorage.setItem('user', JSON.stringify(data.user));
+
+    if (data.user.role === 'admin') {
+      window.location.href = '/admin/admin.html';
+    } else if (data.user.role === 'client') {
+      window.location.href = '/client/client.html';
+    } else {
+      window.location.href = '/';
+    }
+  } catch (err) {
+    document.getElementById('loginError').textContent = err.message;
+  }
+});
+
+  </script>
+</body>
+</html>

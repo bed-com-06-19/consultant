@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Admin Dashboard</title>
+  <link rel="stylesheet" href="sidebar.css" />
+  <link rel="stylesheet" href="admin.css" />
+  <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+</head>
+<body>
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="logo">Admin</div>
+    <ul class="nav">
+      <li class="active"><a href="dashboard.html"><i class="fas fa-tachometer-alt"></i> Dashboard</a></li>
+      <li><a href="userManagement.html"><i class="fas fa-user"></i> Users</a></li>
+      <li><a href="appointments.html"><i class="fas fa-calendar-check"></i> Appointments</a></li>
+      <li><a href="settings.html"><i class="fas fa-cog"></i> Settings</a></li>
+      <li><a href="logout.html"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
+    </ul>
+    <button class="toggle-btn" id="toggleSidebar"><i class="fas fa-angle-left"></i></button>
+  </aside>
+
+  <!-- Main Content -->
+  <main class="main-content">
+    <header>
+      <h1>Dashboard</h1>
+    </header>
+
+    <section class="cards">
+      <div class="card"><h3>Total Users</h3><p>1,240</p></div>
+      <div class="card"><h3>Appointments</h3><p>320</p></div>
+      <div class="card"><h3>Messages</h3><p>85</p></div>
+      <div class="card"><h3>Reports</h3><p>12</p></div>
+    </section>
+
+    <section class="charts">
+      <div class="chart-box">
+        <h3>Appointments Overview</h3>
+        <canvas id="appointmentsChart"></canvas>
+      </div>
+    </section>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script>
+    document.getElementById('toggleSidebar').onclick = () => {
+      document.querySelector('.sidebar').classList.toggle('collapsed');
+    };
+
+    const ctx = document.getElementById('appointmentsChart').getContext('2d');
+    new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'],
+        datasets: [{
+          label: 'Appointments',
+          data: [12, 19, 10, 17, 25],
+          backgroundColor: 'rgba(62, 100, 255, 0.2)',
+          borderColor: '#3e64ff',
+          borderWidth: 2,
+          fill: true,
+          tension: 0.3
+        }]
+      },
+      options: {
+        responsive: true,
+        plugins: {
+          legend: { display: false }
+        },
+        scales: {
+          y: { beginAtZero: true }
+        }
+      }
+    });
+  </script>
+</body>
+</html>

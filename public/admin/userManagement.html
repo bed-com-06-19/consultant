@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Admin - User Management</title>
+  <link rel="stylesheet" href="userManagement.css" />
+  <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+</head>
+<body>
+  <div class="dashboard">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="logo">Admin Panel</div>
+      <ul class="nav">
+        <li>
+          <a href="admin.html"><i class="fas fa-tachometer-alt"></i> Dashboard</a>
+        </li>
+        <li class="active">
+          <a href="userManagement.html"><i class="fas fa-user"></i> Users</a>
+        </li>
+        <li>
+          <a href="appointments.html"><i class="fas fa-calendar-check"></i> Appointments</a>
+        </li>
+        <li>
+          <a href="settings.html"><i class="fas fa-cog"></i> Settings</a>
+        </li>
+        <li>
+          <a href="logout.html"><i class="fas fa-sign-out-alt"></i> Logout</a>
+        </li>
+      </ul>
+      <button class="toggle-btn" id="toggleSidebar"><i class="fas fa-angle-left"></i></button>
+    </aside>
+ <!-- Main Content -->
+ <main class="main-content">
+  <header class="dashboard-header">
+    <h1>User Management</h1>
+    <button class="btn-add-user" onclick="showUserForm()">Add User/Admin</button>
+  </header>
+
+  <!-- Add/Edit Form -->
+  <div id="userForm" style="display:none; margin-bottom: 20px;">
+    <input id="userId" type="hidden">
+    <input type="text" id="name" placeholder="Name">
+    <input type="email" id="email" placeholder="Email">
+    <input type="text" id="role" placeholder="Role (admin/user)">
+    <button onclick="submitUser()">Submit</button>
+    <button onclick="hideUserForm()">Cancel</button>
+  </div>
+
+  <!-- User Table -->
+  <section class="user-table-section">
+    <table class="user-table">
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Email</th>
+          <th>Role</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody id="userTableBody"></tbody>
+    </table>
+  </section>
+</main>
+</div>
+
+<script>
+const API = '/api/admin/users';
+const token = localStorage.getItem('token');
+
+async function loadUsers() {
+  const res = await fetch(API, {
+    headers: { 'Authorization': `Bearer ${token}` }
+  });
+  const users = await res.json();
+  const tbody = document.getElementById('userTableBody');
+  tbody.innerHTML = '';
+
+  users.forEach(user => {
+    const row = document.createElement('tr');
+    row.innerHTML = `
+      <td>${user.name}</td>
+      <td>${user.email}</td>
+      <td>${user.role}</td>
+      <td>
+        <button class="btn-edit" onclick="editUser('${user._id}', '${user.name}', '${user.email}', '${user.role}')">Edit</button>
+        <button class="btn-delete" onclick="deleteUser('${user._id}')">Delete</button>
+      </td>
+    `;
+    tbody.appendChild(row);
+  });
+}
+
+function showUserForm() {
+  document.getElementById('userForm').style.display = 'block';
+  document.getElementById('userId').value = '';
+  document.getElementById('name').value = '';
+  document.getElementById('email').value = '';
+  document.getElementById('role').value = '';
+}
+
+function hideUserForm() {
+  document.getElementById('userForm').style.display = 'none';
+}
+
+async function submitUser() {
+  const id = document.getElementById('userId').value;
+  const name = document.getElementById('name').value;
+  const email = document.getElementById('email').value;
+  const role = document.getElementById('role').value;
+
+  const method = id ? 'PUT' : 'POST';
+  const endpoint = id ? `${API}/${id}` : API;
+
+  await fetch(endpoint, {
+    method,
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${token}`
+    },
+    body: JSON.stringify({ name, email, role })
+  });
+
+  hideUserForm();
+  loadUsers();
+}
+
+function editUser(id, name, email, role) {
+  document.getElementById('userForm').style.display = 'block';
+  document.getElementById('userId').value = id;
+  document.getElementById('name').value = name;
+  document.getElementById('email').value = email;
+  document.getElementById('role').value = role;
+}
+
+async function deleteUser(id) {
+  if (!confirm('Delete this user?')) return;
+  await fetch(`${API}/${id}`, {
+    method: 'DELETE',
+    headers: { 'Authorization': `Bearer ${token}` }
+  });
+  loadUsers();
+}
+
+loadUsers();
+</script>
+</body>
+</html>
