@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>User Settings - ConsultPro</title>
+  <link rel="stylesheet" href="css/style.css"/>
+</head>
+<body>
+  <header class="navbar">
+    <div class="container nav-container">
+      <a href="index.html" class="logo">ConsultPro</a>
+    </div>
+  </header>
+
+  <main class="container">
+    <h1>User Settings</h1>
+    <form id="settingsForm">
+      <label>Name:</label>
+      <input type="text" id="name" placeholder="Enter your name" required />
+
+      <label>Email:</label>
+      <input type="email" id="email" placeholder="Enter your email" required />
+
+      <label>Change Password:</label>
+      <input type="password" id="password" placeholder="New password (optional)" />
+
+      <button type="submit">Save Changes</button>
+    </form>
+  </main>
+
+  <script>
+    const user = JSON.parse(localStorage.getItem('user'));
+
+    document.addEventListener('DOMContentLoaded', () => {
+      if (user) {
+        document.getElementById('name').value = user.name || '';
+        document.getElementById('email').value = user.email || '';
+      }
+    });
+
+    document.getElementById('settingsForm').addEventListener('submit', async function (e) {
+      e.preventDefault();
+
+      const name = document.getElementById('name').value;
+      const email = document.getElementById('email').value;
+      const password = document.getElementById('password').value;
+
+      const payload = { name, email };
+      if (password) {
+        payload.password = password;
+      }
+
+      try {
+        const response = await fetch('https://your-backend-api.com/api/users/update', {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+            // include user token if your API uses authentication
+            'Authorization': `Bearer ${localStorage.getItem('token')}`
+          },
+          body: JSON.stringify(payload)
+        });
+
+        if (!response.ok) {
+          const err = await response.json();
+          throw new Error(err.message || 'Update failed');
+        }
+
+        const updatedUser = await response.json();
+        localStorage.setItem('user', JSON.stringify(updatedUser));
+        alert('Settings updated successfully!');
+        document.getElementById('password').value = ''; // clear password field
+      } catch (error) {
+        alert('Error: ' + error.message);
+      }
+    });
+  </script>
+</body>
+</html>

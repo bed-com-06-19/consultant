@@ -5,6 +5,27 @@
   <title>Admin - Appointments</title>
   <link rel="stylesheet" href="userManagement.css" />
   <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+  <style>
+    /* Simple styles for buttons */
+    .btn-approve {
+      background-color: #4CAF50; color: white; border: none; padding: 5px 10px; cursor: pointer;
+    }
+    .btn-reject {
+      background-color: #f44336; color: white; border: none; padding: 5px 10px; cursor: pointer;
+    }
+    .status-pending {
+      color: orange;
+      font-weight: bold;
+    }
+    .status-approved {
+      color: green;
+      font-weight: bold;
+    }
+    .status-rejected {
+      color: red;
+      font-weight: bold;
+    }
+  </style>
 </head>
 <body>
   <div class="dashboard">
@@ -12,7 +33,7 @@
     <aside class="sidebar">
       <div class="logo">Admin Panel</div>
       <ul class="nav">
-        <li><a href="dashboard.html"><i class="fas fa-tachometer-alt"></i> Dashboard</a></li>
+        <li><a href="admin.html"><i class="fas fa-tachometer-alt"></i> Dashboard</a></li>
         <li><a href="userManagement.html"><i class="fas fa-user"></i> Users</a></li>
         <li class="active"><a href="appointments.html"><i class="fas fa-calendar-check"></i> Appointments</a></li>
         <li><a href="settings.html"><i class="fas fa-cog"></i> Settings</a></li>
@@ -35,6 +56,9 @@
               <th>Email</th>
               <th>Date</th>
               <th>Description</th>
+              <th>Status</th>
+              <th>Action</th>
+              <th>Reason</th>
             </tr>
           </thead>
           <tbody>
@@ -50,31 +74,83 @@
       document.querySelector(".sidebar").classList.toggle("collapsed");
     };
 
-    // Fetch and display appointments
     async function fetchAppointments() {
       try {
-        const response = await fetch('/api/admin/appointments', {
+        const response = await fetch('/api/appointments/all', {  // Note endpoint!
           headers: {
             'Authorization': `Bearer ${localStorage.getItem('token')}`
           }
         });
-        const appointments = await response.json();
+        if (!response.ok) throw new Error('Failed to fetch appointments');
 
+        const appointments = await response.json();
         const tableBody = document.getElementById('appointmentsTable').querySelector('tbody');
         tableBody.innerHTML = '';
 
-        appointments.forEach(appointment => {
-          const row = document.createElement('tr');
-          row.innerHTML = `
-            <td>${appointment.userId?.name || 'N/A'}</td>
-            <td>${appointment.userId?.email || 'N/A'}</td>
-            <td>${new Date(appointment.date).toLocaleString()}</td>
-            <td>${appointment.description}</td>
+        appointments.forEach(app => {
+          const tr = document.createElement('tr');
+
+          // Format status with color
+          let statusClass = '';
+          if (app.status === 'pending') statusClass = 'status-pending';
+          else if (app.status === 'approved') statusClass = 'status-approved';
+          else if (app.status === 'rejected') statusClass = 'status-rejected';
+
+          tr.innerHTML = `
+            <td>${app.userId?.name || 'N/A'}</td>
+            <td>${app.userId?.email || 'N/A'}</td>
+            <td>${new Date(app.date).toLocaleString()}</td>
+            <td>${app.description || app.service || ''}</td>
+            <td class="${statusClass}">${app.status}</td>
+            <td>
+              ${app.status === 'pending' ? `
+                <button class="btn-approve" data-id="${app._id}">Approve</button>
+                <button class="btn-reject" data-id="${app._id}">Reject</button>
+              ` : ''}
+            </td>
+            <td>${app.reason || ''}</td>
           `;
-          tableBody.appendChild(row);
+          tableBody.appendChild(tr);
         });
+
+        // Add event listeners for buttons
+        document.querySelectorAll('.btn-approve').forEach(btn => {
+          btn.onclick = () => updateStatus(btn.dataset.id, 'approved');
+        });
+        document.querySelectorAll('.btn-reject').forEach(btn => {
+          btn.onclick = () => {
+            const reason = prompt('Please enter reason for rejection:');
+            if (reason !== null) {
+              updateStatus(btn.dataset.id, 'rejected', reason);
+            }
+          };
+        });
+
       } catch (error) {
         console.error('Error loading appointments:', error);
+      }
+    }
+
+    async function updateStatus(id, status, reason = '') {
+      try {
+        const res = await fetch(`/api/appointments/${id}/status`, {
+          method: 'PATCH',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${localStorage.getItem('token')}`
+          },
+          body: JSON.stringify({ status, reason })
+        });
+        if (!res.ok) {
+          const errorData = await res.json();
+          alert(`Failed to update: ${errorData.message || 'Unknown error'}`);
+          return;
+        }
+        alert(`Appointment ${status}`);
+        fetchAppointments(); // Refresh table
+      } catch (err) {
+        console.error(err);
+        alert('Error updating status');
       }
     }
 

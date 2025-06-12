@@ -48,32 +48,53 @@
     document.getElementById('toggleSidebar').onclick = () => {
       document.querySelector('.sidebar').classList.toggle('collapsed');
     };
-
-    const ctx = document.getElementById('appointmentsChart').getContext('2d');
-    new Chart(ctx, {
-      type: 'line',
-      data: {
-        labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'],
-        datasets: [{
-          label: 'Appointments',
-          data: [12, 19, 10, 17, 25],
-          backgroundColor: 'rgba(62, 100, 255, 0.2)',
-          borderColor: '#3e64ff',
-          borderWidth: 2,
-          fill: true,
-          tension: 0.3
-        }]
-      },
-      options: {
-        responsive: true,
-        plugins: {
-          legend: { display: false }
-        },
-        scales: {
-          y: { beginAtZero: true }
-        }
+  
+    async function loadDashboardData() {
+      try {
+        const res = await fetch('/api/admin/dashboard', {
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('token')}`
+          } 
+        });
+  
+        const data = await res.json();
+  
+        document.querySelector('.card:nth-child(1) p').innerText = data.totalUsers;
+        document.querySelector('.card:nth-child(2) p').innerText = data.totalAppointments;
+        document.querySelector('.card:nth-child(3) p').innerText = data.totalMessages;
+        document.querySelector('.card:nth-child(4) p').innerText = data.totalReports;
+  
+        const ctx = document.getElementById('appointmentsChart').getContext('2d');
+        new Chart(ctx, {
+          type: 'line',
+          data: {
+            labels: Object.keys(data.chartData),
+            datasets: [{
+              label: 'Appointments',
+              data: Object.values(data.chartData),
+              backgroundColor: 'rgba(62, 100, 255, 0.2)',
+              borderColor: '#3e64ff',
+              borderWidth: 2,
+              fill: true,
+              tension: 0.3
+            }]
+          },
+          options: {
+            responsive: true,
+            plugins: {
+              legend: { display: false }
+            },
+            scales: {
+              y: { beginAtZero: true }
+            }
+          }
+        });
+      } catch (err) {
+        console.error('Failed to load dashboard data:', err);
       }
-    });
-  </script>
+    }
+  
+    loadDashboardData();
+  </script>  
 </body>
 </html>

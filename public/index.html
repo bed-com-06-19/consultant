@@ -5,30 +5,112 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>ConsultPro - Home</title>
   <link rel="stylesheet" href="css/style.css" />
-  <link
-  rel="stylesheet"
-  href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
-/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+  <style>
+    .profile-container {
+      position: relative;
+      display: inline-block;
+      margin-left: 20px;
+    }
 
+    .profile-avatar {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: url('images/avatar.png') no-repeat center center/cover;
+      cursor: pointer;
+      border: 2px solid #ccc;
+    }
+
+    .dropdown-menu {
+      position: absolute;
+      top: 45px;
+      right: 0;
+      background-color: #fff;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      display: none;
+      min-width: 140px;
+      z-index: 999;
+      border-radius: 6px;
+      overflow: hidden;
+    }
+
+    .dropdown-menu a {
+      display: block;
+      padding: 12px 16px;
+      text-decoration: none;
+      color: #333;
+      font-size: 14px;
+      transition: background-color 0.3s ease;
+    }
+
+    .dropdown-menu a:hover {
+      background-color: #f5f5f5;
+    }
+
+    /* Make space for avatar next to nav */
+    .nav-container {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    nav {
+      flex-grow: 1;
+      margin-left: 40px;
+    }
+
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+    }
+
+    .nav-links li {
+      list-style: none;
+    }
+
+    .nav-links a {
+      text-decoration: none;
+      color: #333;
+      font-weight: 500;
+    }
+
+    .btn-login, .btn-book {
+      background-color: #007BFF;
+      color: white;
+      padding: 6px 12px;
+      border-radius: 4px;
+    }
+  </style>
 </head>
 <body>
-  <!-- Header -->
-  <header class="navbar">
-    <div class="container nav-container">
-      <a href="#" class="logo">ConsultPro</a>
-      <nav>
-        <ul class="nav-links">
-          <li><a href="#" class="active">Home</a></li>
-          <li><a href="services.html">Services</a></li>
-          <li><a href="testimonial.html">Testimonial</a></li>
-          <li><a href="#about">About</a></li>
-          <li><a href="contact.html">Contact</a></li>
-          <li><a href="login.html" class="btn-login">Login</a></li>
-        </ul>
-      </nav>
-    </div>
-  </header>
 
+<header class="navbar">
+  <div class="container nav-container">
+    <a href="#" class="logo">ConsultPro</a>
+
+    <nav>
+      <ul class="nav-links" id="navLinks">
+        <li><a href="#" class="active">Home</a></li>
+        <li><a href="services.html">Services</a></li>
+        <li><a href="testimonial.html">Testimonial</a></li>
+        <li><a href="#about">About</a></li>
+        <li><a href="contact.html">Contact</a></li>
+        <li id="loginItem"><a href="login.html" class="btn-login">Login</a></li>
+      </ul>
+    </nav>
+
+    <div class="profile-container" id="profileContainer" style="display: none;">
+      <div class="profile-avatar" id="profileAvatar"></div>
+      <div class="dropdown-menu" id="dropdownMenu">
+        <a href="settings.html">Settings</a>
+        <a href="#" onclick="logout()">Logout</a>
+      </div>
+    </div>
+  </div>
+</header>
+  
   <!-- Hero Section -->
   <section class="hero">
     <div class="container hero-content">
@@ -83,7 +165,7 @@
         <h4>About Us</h4>
         <p>We offer expert consulting services to help you reach personal and professional goals with strategic clarity and confidence.</p>
       </div>
-  
+
       <div class="footer-col">
         <h4>Quick Links</h4>
         <ul>
@@ -93,7 +175,7 @@
           <li><a href="testimonials.html">Testimonials</a></li>
         </ul>
       </div>
-  
+
       <div class="footer-col">
         <h4>Contact Us</h4>
         <ul>
@@ -102,7 +184,7 @@
           <li>Address: 123 Main Street, City, Country</li>
         </ul>
       </div>
-  
+
       <div class="footer-col">
         <h4>Newsletter</h4>
         <form class="newsletter-form">
@@ -117,11 +199,50 @@
         </div>
       </div>
     </div>
-  
+
     <div class="footer-bottom">
       &copy; 2025 ConsultSite. All rights reserved.
     </div>
   </footer>
+
+  <!-- JavaScript to Manage Navbar Based on Login -->
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const user = JSON.parse(localStorage.getItem('user'));
+      const role = localStorage.getItem('role');
+      const navLinks = document.getElementById('navLinks');
+      const loginItem = document.getElementById('loginItem');
+      const profileContainer = document.getElementById('profileContainer');
+      const avatar = document.getElementById('profileAvatar');
+      const dropdown = document.getElementById('dropdownMenu');
+  
+      if (user && role === 'client') {
+        if (loginItem) loginItem.remove();
+  
+        const bookingLi = document.createElement('li');
+        bookingLi.innerHTML = '<a href="booking.html" class="btn-book">Book Appointment</a>';
+        navLinks.appendChild(bookingLi);
+  
+        profileContainer.style.display = 'inline-block';
+      }
+  
+      avatar.addEventListener('click', (e) => {
+        e.stopPropagation(); // Prevents immediate close
+        dropdown.style.display = dropdown.style.display === 'block' ? 'none' : 'block';
+      });
+  
+      window.addEventListener('click', (e) => {
+        if (!profileContainer.contains(e.target)) {
+          dropdown.style.display = 'none';
+        }
+      });
+    });
+  
+    function logout() {
+      localStorage.clear();
+      window.location.href = 'login.html';
+    }
+  </script>
   
 </body>
 </html>
