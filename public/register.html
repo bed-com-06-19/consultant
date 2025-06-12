@@ -29,9 +29,7 @@
         <div class="form-group">
           <label for="role">Role</label>
           <select id="role" name="role" required>
-            <option value="">-- Select Role --</option>
-            <option value="user">User</option>
-            <option value="admin">Admin</option>
+            <option value="client" selected>client</option>
           </select>
         </div>
 
@@ -43,14 +41,13 @@
   </div>
 
   <script>
-    // Example JS to submit to backend
     document.getElementById('registerForm').addEventListener('submit', async (e) => {
       e.preventDefault();
 
       const name = document.getElementById('name').value;
       const email = document.getElementById('email').value;
       const password = document.getElementById('password').value;
-      const role = document.getElementById('role').value;
+      const role = document.getElementById('role').value; // This will always be "client"
 
       const response = await fetch('http://localhost:3000/api/auth/register', {
         method: 'POST',
