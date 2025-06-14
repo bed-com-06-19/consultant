@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin Settings</title>
+  <link rel="stylesheet" href="settings.css" />
+  <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+</head>
+<body>
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="logo">Admin</div>
+    <ul class="nav">
+      <li><a href="dashboard.html"><i class="fas fa-tachometer-alt"></i> Dashboard</a></li>
+      <li><a href="userManagement.html"><i class="fas fa-user"></i> Users</a></li>
+      <li><a href="appointments.html"><i class="fas fa-calendar-check"></i> Appointments</a></li>
+      <li class="active"><a href="settings.html"><i class="fas fa-cog"></i> Settings</a></li>
+      <li><a href="logout.html"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
+    </ul>
+    <button class="toggle-btn" id="toggleSidebar"><i class="fas fa-angle-left"></i></button>
+  </aside>
+
+  <!-- Main Content -->
+  <main class="main-content">
+    <header><h1>Admin Settings</h1></header>
+
+    <section class="settings-section">
+      <h2>Platform Settings</h2>
+      <label>Site Name:</label>
+      <input type="text" id="siteName" placeholder="Enter site name" />
+
+      <label>Contact Email:</label>
+      <input type="email" id="contactEmail" placeholder="Enter support email" />
+
+      <label>Phone Number:</label>
+      <input type="text" id="contactPhone" placeholder="Enter contact phone" />
+
+      <label>Company Address:</label>
+      <input type="text" id="address" placeholder="Enter address" />
+
+      <label>Theme:</label>
+      <select id="theme">
+        <option value="light">Light</option>
+        <option value="dark">Dark</option>
+      </select>
+
+      <label><input type="checkbox" id="maintenanceMode" /> Enable Maintenance Mode</label>
+    </section>
+
+    <section class="settings-section">
+      <h2>Security Settings</h2>
+      <label><input type="checkbox" id="enable2FA" /> Enable Two-Factor Authentication (2FA)</label>
+      <label>Session Timeout (minutes):</label>
+      <input type="number" id="sessionTimeout" min="1" value="30" />
+
+      <label>Password Policy:</label>
+      <input type="text" id="passwordPolicy" placeholder="e.g. Min 8 characters, 1 special char" />
+
+      <label>Recent Login Logs:</label>
+      <textarea id="loginLogs" readonly rows="5">(Logs will be loaded here...)</textarea>
+    </section>
+
+    <button class="btn-primary" onclick="saveSettings()">Save Settings</button>
+  </main>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      loadSettings();
+      loadLoginLogs();
+  
+      document.getElementById('toggleSidebar').onclick = () => {
+        document.querySelector('.sidebar').classList.toggle('collapsed');
+      };
+    });
+  
+    // Load current admin settings
+    async function loadSettings() {
+      try {
+        const res = await fetch('/api/admin/settings', {
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('token')}`
+          }
+        });
+  
+        if (!res.ok) throw new Error('Failed to fetch settings');
+  
+        const settings = await res.json();
+  
+        document.getElementById('siteName').value = settings.siteName || '';
+        document.getElementById('contactEmail').value = settings.contactEmail || '';
+        document.getElementById('contactPhone').value = settings.contactPhone || '';
+        document.getElementById('address').value = settings.address || '';
+        document.getElementById('theme').value = settings.theme || 'light';
+        document.getElementById('maintenanceMode').checked = settings.maintenanceMode || false;
+  
+        document.getElementById('enable2FA').checked = settings.enable2FA || false;
+        document.getElementById('sessionTimeout').value = settings.sessionTimeout || 30;
+        document.getElementById('passwordPolicy').value = settings.passwordPolicy || '';
+      } catch (err) {
+        console.error('Error loading settings:', err);
+        alert('Error loading settings.');
+      }
+    }
+  
+    // Save settings
+    async function saveSettings() {
+      const settings = {
+        siteName: document.getElementById('siteName').value,
+        contactEmail: document.getElementById('contactEmail').value,
+        contactPhone: document.getElementById('contactPhone').value,
+        address: document.getElementById('address').value,
+        theme: document.getElementById('theme').value,
+        maintenanceMode: document.getElementById('maintenanceMode').checked,
+        enable2FA: document.getElementById('enable2FA').checked,
+        sessionTimeout: parseInt(document.getElementById('sessionTimeout').value),
+        passwordPolicy: document.getElementById('passwordPolicy').value,
+      };
+  
+      try {
+        const res = await fetch('/api/admin/settings', {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${localStorage.getItem('token')}`
+          },
+          body: JSON.stringify(settings)
+        });
+  
+        if (res.ok) {
+          alert('Settings saved successfully');
+        } else {
+          alert('Failed to save settings');
+        }
+      } catch (err) {
+        console.error('Error saving settings:', err);
+        alert('An error occurred while saving settings.');
+      }
+    }
+  
+    // Load recent login logs
+    async function loadLoginLogs() {
+      try {
+        const res = await fetch('/api/admin/login-logs', {
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('token')}`
+          }
+        });
+  
+        if (!res.ok) throw new Error('Failed to fetch login logs');
+  
+        const logs = await res.json();
+        const formattedLogs = logs.map(log => 
+          `${log.username} logged in at ${new Date(log.timestamp).toLocaleString()}`
+        ).join('\n');
+  
+        document.getElementById('loginLogs').value = formattedLogs;
+      } catch (err) {
+        console.error('Error loading login logs:', err);
+        document.getElementById('loginLogs').value = 'Failed to load logs.';
+      }
+    }
+  </script>
+  
+</body>
+</html>

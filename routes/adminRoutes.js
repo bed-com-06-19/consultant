@@ -6,6 +6,73 @@ const { auth, adminOnly } = require('../middleware/authMiddleware');
 
 const router = express.Router();
 
+// Load admin platform settings
+router.get('/settings', auth, adminOnly, async (req, res) => {
+  try {
+    const settings = await Settings.findOne(); // Assuming only one settings doc
+    if (!settings) return res.status(404).json({ error: 'Settings not found' });
+    res.json(settings);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Save or update admin platform settings
+router.put('/settings', auth, adminOnly, async (req, res) => {
+  try {
+    const data = req.body;
+
+    let settings = await Settings.findOne();
+    if (!settings) {
+      settings = new Settings(data);
+    } else {
+      Object.assign(settings, data); // merge updates
+    }
+
+    await settings.save();
+    res.json({ message: 'Settings updated successfully' });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Return last 10 login logs from users
+router.get('/login-logs', auth, adminOnly, async (req, res) => {
+  try {
+    const users = await User.find({ 'loginHistory.0': { $exists: true } })
+      .select('name loginHistory')
+      .sort({ 'loginHistory.timestamp': -1 });
+
+    const logs = [];
+
+    users.forEach(user => {
+      (user.loginHistory || []).forEach(log => {
+        logs.push({ username: user.name, timestamp: log.timestamp });
+      });
+    });
+
+    logs.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp)); // newest first
+
+    res.json(logs.slice(0, 10)); // latest 10 logs
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// GET /api/admin/login-logs/:userId
+router.get('/login-logs/:userId', auth, adminOnly, async (req, res) => {
+  try {
+    const user = await User.findById(req.params.userId);
+    if (!user) return res.status(404).json({ message: 'User not found' });
+
+    res.json(user.loginHistory);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+
+
 // 1. 🧑‍💼 Get All Users
 router.get('/users', auth, adminOnly, async (req, res) => {
   try {
