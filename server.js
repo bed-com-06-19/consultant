@@ -1,7 +1,7 @@
 // server.js
 const express = require('express');
 const path = require('path');
-require('dotenv').config();
+require('dotenv').config(); // Load .env variables
 
 // Firebase setup
 const { db } = require('./firebase');
@@ -18,20 +18,20 @@ const PORT = process.env.PORT || 3000;
 // Middleware to parse JSON
 app.use(express.json());
 
-// Serve static files (login.html, register.html, style.css, etc.)
+// Serve static files (HTML, CSS, JS)
 app.use(express.static(path.join(__dirname, 'public')));
 
-// Root route – serves index.html (homepage/login page)
+// Root route (homepage)
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
 // API Routes
-app.use('/api/auth', authRoutes);                 // Auth (login/register)
-app.use('/api/appointments', appointmentRoutes); // Appointment actions
-app.use('/api/admin', adminRoutes);              // Admin actions
+app.use('/api/auth', authRoutes);                 // Register/Login
+app.use('/api/appointments', appointmentRoutes);  // Appointment logic
+app.use('/api/admin', adminRoutes);               // Admin-only routes
 
-// Protected route to test JWT and role access
+// Protected test route
 app.get('/api/protected', auth, (req, res) => {
   res.json({ message: `Hello ${req.user.role}, you are authenticated.` });
 });
