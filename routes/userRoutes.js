@@ -1,31 +1,72 @@
 const express = require('express');
-const router = express.Router();
-const User = require('../models/User');
+const bcrypt = require('bcryptjs');
+const { db, admin } = require('../firebase');
+const { auth } = require('../middleware/authMiddleware');
 
-// POST: Create new user
+const router = express.Router();
+
+// POST: Create new user (register)
 router.post('/users', async (req, res) => {
   try {
-    const user = await User.create(req.body);
-    res.status(201).json(user);
+    const { name, email, password, role } = req.body;
+
+    if (!name || !email || !password) {
+      return res.status(400).json({ message: 'Name, email, and password are required.' });
+    }
+
+    // Check if user with email exists
+    const snapshot = await db.collection('users').where('email', '==', email).get();
+    if (!snapshot.empty) {
+      return res.status(400).json({ message: 'Email already exists' });
+    }
+
+    // Hash password
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    // Add user to Firestore
+    const userDoc = await db.collection('users').add({
+      name,
+      email,
+      password: hashedPassword,
+      role: role || 'client', // default role if not provided
+      loginHistory: []
+    });
+
+    res.status(201).json({ id: userDoc.id, name, email, role: role || 'client' });
   } catch (err) {
-    res.status(400).json({ error: err.message });
+    res.status(500).json({ error: err.message });
   }
 });
 
-router.put('/update', authenticateToken, async (req, res) => {
+// PUT: Update logged-in user profile
+router.put('/update', auth, async (req, res) => {
   const { name, email, password } = req.body;
-  const userId = req.user.id; // from token
+  const userId = req.user.userId;
 
-  const updateData = { name, email };
-  if (password) {
-    updateData.password = await bcrypt.hash(password, 10);
+  if (!name && !email && !password) {
+    return res.status(400).json({ message: 'At least one field (name, email, or password) must be provided for update.' });
   }
 
   try {
-    const updatedUser = await User.findByIdAndUpdate(userId, updateData, { new: true });
+    const updateData = {};
+    if (name) updateData.name = name;
+    if (email) updateData.email = email;
+    if (password) {
+      updateData.password = await bcrypt.hash(password, 10);
+    }
+
+    await db.collection('users').doc(userId).update(updateData);
+
+    // Fetch updated user data to return
+    const updatedUserDoc = await db.collection('users').doc(userId).get();
+    if (!updatedUserDoc.exists) {
+      return res.status(404).json({ message: 'User not found after update.' });
+    }
+    const updatedUser = updatedUserDoc.data();
+
     res.json({ name: updatedUser.name, email: updatedUser.email });
   } catch (err) {
-    res.status(500).json({ message: 'Failed to update user.' });
+    res.status(500).json({ message: 'Failed to update user.', error: err.message });
   }
 });
 

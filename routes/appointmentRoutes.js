@@ -1,9 +1,16 @@
 const express = require('express');
+const { db } = require('../firebase');
 const { auth } = require('../middleware/authMiddleware');
-const Appointment = require('../models/Appointment');
-const User = require('../models/User'); // Assuming you have a User model
 
 const router = express.Router();
+
+// Middleware to check admin role
+function isAdmin(req, res, next) {
+  if (req.user.role !== 'admin') {
+    return res.status(403).json({ message: 'Access denied: Admins only' });
+  }
+  next();
+}
 
 // Create appointment (client)
 router.post('/', auth, async (req, res) => {
@@ -14,16 +21,18 @@ router.post('/', auth, async (req, res) => {
   }
 
   try {
-    const appointment = new Appointment({
+    const newAppointment = {
       userId: req.user.userId,
       service,
       date,
       time,
       status: 'pending',
-    });
+      createdAt: new Date()
+    };
 
-    await appointment.save();
-    res.status(201).json({ message: 'Appointment created', appointment });
+    const docRef = await db.collection('appointments').add(newAppointment);
+
+    res.status(201).json({ message: 'Appointment created', id: docRef.id });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -32,30 +41,39 @@ router.post('/', auth, async (req, res) => {
 // Get all appointments for the logged-in client
 router.get('/', auth, async (req, res) => {
   try {
-    const appointments = await Appointment.find({ userId: req.user.userId }).sort({ createdAt: -1 });
+    const snapshot = await db.collection('appointments')
+      .where('userId', '==', req.user.userId)
+      .orderBy('createdAt', 'desc')
+      .get();
+
+    const appointments = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
     res.json(appointments);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 });
 
-// --------------- ADMIN ROUTES ------------------
-
-// Middleware to check admin role
-function isAdmin(req, res, next) {
-  if (req.user.role !== 'admin') {
-    return res.status(403).json({ message: 'Access denied: Admins only' });
-  }
-  next();
-}
+// ---------------- ADMIN ROUTES ---------------- //
 
 // Get all appointments (admin) with client info
 router.get('/all', auth, isAdmin, async (req, res) => {
   try {
-    // Populate user info (email, name)
-    const appointments = await Appointment.find()
-      .populate('userId', 'email name') // Adjust fields as per your User model
-      .sort({ createdAt: -1 });
+    const snapshot = await db.collection('appointments')
+      .orderBy('createdAt', 'desc')
+      .get();
+
+    const appointments = await Promise.all(snapshot.docs.map(async doc => {
+      const data = doc.data();
+      let user = {};
+      if (data.userId) {
+        const userDoc = await db.collection('users').doc(data.userId).get();
+        if (userDoc.exists) {
+          const u = userDoc.data();
+          user = { name: u.name, email: u.email };
+        }
+      }
+      return { id: doc.id, ...data, user };
+    }));
 
     res.json(appointments);
   } catch (err) {
@@ -64,7 +82,6 @@ router.get('/all', auth, isAdmin, async (req, res) => {
 });
 
 // Update appointment status (admin)
-// Accept or reject appointment with optional reason
 router.patch('/:id/status', auth, isAdmin, async (req, res) => {
   const { id } = req.params;
   const { status, reason } = req.body;
@@ -74,21 +91,23 @@ router.patch('/:id/status', auth, isAdmin, async (req, res) => {
   }
 
   try {
-    const appointment = await Appointment.findById(id);
-    if (!appointment) {
+    const appointmentRef = db.collection('appointments').doc(id);
+    const appointmentDoc = await appointmentRef.get();
+
+    if (!appointmentDoc.exists) {
       return res.status(404).json({ message: 'Appointment not found' });
     }
 
-    appointment.status = status;
-    if (status === 'rejected' && reason) {
-      appointment.reason = reason; // Save reason for rejection
+    const updateData = { status };
+    if (status === 'rejected') {
+      updateData.reason = reason || 'No reason provided';
     } else {
-      appointment.reason = undefined; // Clear reason if approved
+      updateData.reason = admin.firestore.FieldValue.delete(); // Clear reason
     }
 
-    await appointment.save();
+    await appointmentRef.update(updateData);
 
-    res.json({ message: `Appointment ${status}`, appointment });
+    res.json({ message: `Appointment ${status}` });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
