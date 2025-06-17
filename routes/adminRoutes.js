@@ -135,6 +135,29 @@ router.get('/login-logs/:userId', auth, adminOnly, async (req, res) => {
   }
 });
 
+// 10. Admin Platform Settings (GET & PUT)
+router.get('/settings', auth, adminOnly, async (req, res) => {
+  try {
+    const doc = await db.collection('platform').doc('settings').get();
+    if (!doc.exists) {
+      return res.status(404).json({ error: 'Settings not found' });
+    }
+    res.json(doc.data());
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+router.put('/settings', auth, adminOnly, async (req, res) => {
+  try {
+    await db.collection('platform').doc('settings').set(req.body, { merge: true });
+    res.json({ message: 'Settings updated successfully' });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+
 // 9. Admin Dashboard Summary
 router.get('/dashboard', auth, adminOnly, async (req, res) => {
   try {
